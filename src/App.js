@@ -69,6 +69,14 @@ class App extends Component {
       archived: false
     }).then(function (response) {
       console.log(response.data);
+      let famousPersons = [...self.state.famousPersons];
+      famousPersons.push(response.data);
+      self.setState({
+        famousPersons: famousPersons,
+        id: "", firstName: "", middleName: "", lastName: "",
+        gender: "", age: "", occupation: "", citizenship: "",
+        birthDate: "", bio: "", createdDatetime: ""
+      });
     }).catch(function (error) {
       console.log(error);
     });
@@ -93,6 +101,47 @@ class App extends Component {
       archived: false
     }).then(function (response) {
       console.log(response.data);
+      let famousPersons = [...self.state.famousPersons];
+      let index = famousPersons.findIndex(x => x.id === self.state.id);
+      famousPersons[index].firstName = response.data.firstName;
+      famousPersons[index].middleName = response.data.middleName;
+      famousPersons[index].lastName = response.data.lastName;
+      famousPersons[index].fullName = response.data.fullName;
+      famousPersons[index].gender = response.data.gender;
+      famousPersons[index].occupation = response.data.occupation;
+      famousPersons[index].citizenship = response.data.citizenship;
+      famousPersons[index].bio = response.data.bio;
+      famousPersons[index].age = response.data.age;
+      famousPersons[index].birthDate = response.data.birthDate;
+      famousPersons[index].createdDatetime = response.data.createdDatetime;
+      famousPersons[index].modifiedDatetime = response.data.modifiedDatetime;
+
+      self.setState({
+        famousPersons: famousPersons,
+        id: "", firstName: "", middleName: "", lastName: "",
+        gender: "", age: "", occupation: "", citizenship: "",
+        birthDate: "", bio: "", createdDatetime: ""
+      });
+    }).catch(function (error) {
+      console.log(error);
+    });
+  }
+
+  deleteFamousPerson = () => {
+    const self = this;
+
+    axios.delete('http://localhost:8080/deletePerson/' + self.state.id).then(function (response) {
+      console.log(response.data);
+      let famousPersons = [...self.state.famousPersons];
+      let index = famousPersons.findIndex(x => x.id === self.state.id);
+      famousPersons.splice(index, 1);
+
+      self.setState({
+        famousPersons: famousPersons,
+        id: "", firstName: "", middleName: "", lastName: "",
+        gender: "", age: "", occupation: "", citizenship: "",
+        birthDate: "", bio: "", createdDatetime: ""
+      });
     }).catch(function (error) {
       console.log(error);
     });
@@ -122,6 +171,21 @@ class App extends Component {
     this.setState({ birthDate: value });
   }
 
+  /**Other Function*/
+  validate = () => {
+    return !(
+      this.state.firstName === "" ||
+      this.state.lastName === "" ||
+      this.state.gender === "" ||
+      this.state.age === "" ||
+      this.state.occupation === "" ||
+      this.state.citizenship === "" ||
+      this.state.birthDate === "" ||
+      this.state.bio === ""
+
+    );
+  }
+
 
   UNSAFE_componentWillMount() {
     const self = this;
@@ -134,126 +198,137 @@ class App extends Component {
       genderOptions: [{ key: "Female", value: "Female", text: "Female" }, { key: "Male", value: "Male", text: "Male" }]
     }
     return (
-      <Grid container className="h-100 pad-vertical-10">
-        <Grid.Row columns={2}>
-          <Grid.Column width={6}>
-            <Menu attached="top">
-              <Menu.Item header> Famous Persons</Menu.Item>
-            </Menu>
-            <Segment attached className="h-95 o-auto">
-              <Item.Group divided>
-                {
-                  famousPersons.map((row, index) =>
-                    <Item key={index}>
-                      <Item.Content>
-                        <Item.Header as="a"><span onClick={() => this.handleGetPersonDetails(row)}>{row.fullName}</span></Item.Header>
-                        <Item.Meta>{dateFormat(row.birthDate, "mmm dd, yyyy")}</Item.Meta>
-                        <Item.Description className="text-ellipsis">{row.bio}</Item.Description>
-                      </Item.Content>
-                    </Item>
-                  )
-                }
-              </Item.Group>
-            </Segment>
-          </Grid.Column>
-          <Grid.Column width={10} className="h-100 center-display">
-            <Segment attached >
-              <Form>
-                <Form.Group widths="equal">
-                  <Form.Input
-                    label="First Name"
-                    placeholder="First Name"
-                    required
-                    value={firstName}
-                    onChange={(event, data) => this.setState({ firstName: data.value })}
-                  />
-                  <Form.Input
-                    label="Middle Name"
-                    placeholder="Middle Name"
-                    value={middleName}
-                    onChange={(event, data) => this.setState({ middleName: data.value })}
-                  />
-                  <Form.Input
-                    label="Last Name"
-                    placeholder="Last Name"
-                    required
-                    value={lastName}
-                    onChange={(event, data) => this.setState({ lastName: data.value })}
-                  />
-                </Form.Group>
-                <Form.Group widths="equal">
-                  <Form.Input
-                    label="Age"
-                    placeholder="Age"
-                    type="Number"
-                    required
-                    value={age}
-                    onChange={(event, data) => this.setState({ age: data.value })}
-                  />
-                  <Form.Dropdown
-                    label="Gender"
-                    placeholder="Gender"
-                    search selection options={data.genderOptions}
-                    required
-                    value={gender}
-                    onChange={(event, data) => this.setState({ gender: data.value })}
-                  />
-                  <DateInput
-                    name="date"
-                    label="Birthdate"
-                    placeholder="Birthdate"
-                    value={birthDate}
-                    animation="fade"
-                    closable
-                    autoComplete='off'
-                    iconPosition="left"
-                    onChange={this.handleDateChange}
-                    dateFormat='MMM DD, YYYY'
-                  />
-                </Form.Group>
-                <Form.Group widths="equal">
-                  <Form.Input
-                    label="Citizenship"
-                    placeholder="Citizenship"
-                    required
-                    value={citizenship}
-                    onChange={(event, data) => this.setState({ citizenship: data.value })}
-                  />
-                  <Form.Input
-                    label="Occupation"
-                    placeholder="Occupation"
-                    required
-                    value={occupation}
-                    onChange={(event, data) => this.setState({ occupation: data.value })}
-                  />
-                </Form.Group>
-                <Form.Group widths="equal">
-                  <Form.TextArea
-                    label="Bio"
-                    placeholder="Bio"
-                    required
-                    value={bio}
-                    rows={3}
-                    onChange={(event, data) => this.setState({ bio: data.value })}
-                  />
-                </Form.Group>
-              </Form>
-            </Segment>
-            <Menu attached="bottom">
-              <Menu.Menu position="right">
-                <Menu.Item>
+      <div className="h-100 pad-vertical-10 theme-bg-2">
+        <Grid container>
+          <Grid.Row columns={2}>
+            <Grid.Column width={10}>
+              <Menu attached="top">
+                <Menu.Item header> Famous Persons</Menu.Item>
+              </Menu>
+              <Segment attached className="h-95 o-auto">
+                <Item.Group divided>
                   {
-                    !this.state.update ?
-                      <Button onClick={this.addFamousPerson}>Add</Button>
-                      :
-                      <Button onClick={this.editFamousPerson}>Save</Button>
+                    famousPersons.map((row, index) =>
+                      <Item key={index}>
+                        <Item.Content>
+                          <Item.Header as="a"><span onClick={() => this.handleGetPersonDetails(row)}>{row.fullName}</span></Item.Header>
+                          <Item.Meta>{dateFormat(row.birthDate, "mmm dd, yyyy")}</Item.Meta>
+                          <Item.Description className="text-ellipsis">{row.bio}</Item.Description>
+                        </Item.Content>
+                      </Item>
+                    )
                   }
-                </Menu.Item>
-              </Menu.Menu>
-            </Menu>
-          </Grid.Column>
-        </Grid.Row>
-      </Grid>
+                </Item.Group>
+              </Segment>
+            </Grid.Column>
+            <Grid.Column width={6} className="h-100 center-display">
+              <Segment attached >
+                <Form>
+                  <Form.Group widths="equal">
+                    <Form.Input
+                      label="First Name"
+                      placeholder="First Name"
+                      required
+                      value={firstName}
+                      onChange={(event, data) => this.setState({ firstName: data.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.Input
+                      label="Middle Name"
+                      placeholder="Middle Name"
+                      value={middleName}
+                      onChange={(event, data) => this.setState({ middleName: data.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.Input
+                      label="Last Name"
+                      placeholder="Last Name"
+                      required
+                      value={lastName}
+                      onChange={(event, data) => this.setState({ lastName: data.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.Input
+                      label="Age"
+                      placeholder="Age"
+                      type="Number"
+                      required
+                      value={age}
+                      onChange={(event, data) => this.setState({ age: data.value })}
+                    />
+                    <Form.Dropdown
+                      label="Gender"
+                      placeholder="Gender"
+                      search selection options={data.genderOptions}
+                      required
+                      compact
+                      value={gender}
+                      onChange={(event, data) => this.setState({ gender: data.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <DateInput
+                      name="date"
+                      label="Birthdate"
+                      placeholder="Birthdate"
+                      value={birthDate}
+                      animation="fade"
+                      closable
+                      autoComplete='off'
+                      iconPosition="left"
+                      onChange={this.handleDateChange}
+                      dateFormat='MMM DD, YYYY'
+                    />
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.Input
+                      label="Citizenship"
+                      placeholder="Citizenship"
+                      required
+                      value={citizenship}
+                      onChange={(event, data) => this.setState({ citizenship: data.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.Input
+                      label="Occupation"
+                      placeholder="Occupation"
+                      required
+                      value={occupation}
+                      onChange={(event, data) => this.setState({ occupation: data.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group widths="equal">
+                    <Form.TextArea
+                      label="Bio"
+                      placeholder="Bio"
+                      required
+                      value={bio}
+                      rows={4}
+                      onChange={(event, data) => this.setState({ bio: data.value })}
+                    />
+                  </Form.Group>
+                  <Form.Field>
+                    {
+                      !this.state.update ?
+                        <Button positive fluid onClick={this.addFamousPerson} disabled={!this.validate()}>Add</Button>
+                        :
+                        <Button.Group fluid>
+                          <Button negative onClick={this.deleteFamousPerson}>Delete</Button>
+                          <Button.Or />
+                          <Button positive onClick={this.editFamousPerson} disabled={!this.validate()}>Save</Button>
+                        </Button.Group>
+                    }
+                  </Form.Field>
+                </Form>
+              </Segment>
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
+      </div>
     );
   }
 }
