@@ -203,6 +203,7 @@ class App extends Component {
                     label="Birthdate"
                     placeholder="Birthdate"
                     value={birthDate}
+                    animation="fade"
                     closable
                     autoComplete='off'
                     iconPosition="left"
